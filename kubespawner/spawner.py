@@ -504,4 +504,13 @@ class KubeSpawner(Spawner):
             'JPY_HUB_PREFIX': self.hub.server.base_url,
             'JPY_HUB_API_URL': self.accessible_hub_api_url
         })
+	
+        if self.notebook_dir:
+            notebook_dir = self.format_string(self.notebook_dir)
+            env['JPY_NOTEBOOK_DIR'] = notebook_dir
+
+        if self.default_url:
+            default_url = self.format_string(self.default_url)
+            env['JPY_DEFAULT_URL'] = default_url
+
         return env
