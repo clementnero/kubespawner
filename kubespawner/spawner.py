@@ -8,6 +8,7 @@ import os
 import json
 import string
 from urllib.parse import urlparse, urlunparse
+from datetime import datetime
 
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPError
@@ -463,6 +464,7 @@ class KubeSpawner(Spawner):
             yield gen.sleep(1)
         self.user.server.ip = data['status']['podIP']
         self.user.server.port = 8888
+        self.user.last_spwaner_start = datetime.utcnow()
         self.db.commit()
 
     @gen.coroutine
@@ -491,6 +493,8 @@ class KubeSpawner(Spawner):
                 if data is None:
                     break
                 yield gen.sleep(1)
+        self.user.total_time = int(self.user.total_time + (datetime.utcnow() - self.user.last_spwaner_start).total_seconds())
+        self.db.commit()
 
     def _env_keep_default(self):
         return []
