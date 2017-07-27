@@ -320,19 +320,17 @@ class KubeSpawner(Spawner):
             'mountPath': '/var/run/secrets/kubernetes.io/serviceaccount',
             'readOnly': True
         }]
-        spec = make_pod_spec(
+        return make_pod_spec(
             self.pod_name,
             self.singleuser_image_spec,
             self.get_env(),
             self._expand_all(self.volumes) + hack_volumes,
             self._expand_all(self.volume_mounts) + hack_volume_mounts,
-            self.user_options['cpu'],#self.cpu_limit,
+            self.cpu_limit,
             self.cpu_guarantee,
-            self.user_options['memory'],#self.mem_limit,
+            self.mem_limit,
             self.mem_guarantee,
         )
-        self.log.info("About to deploy the following kube spec: " + str(spec))
-        return spec
 
     def get_pvc_manifest(self):
         """
@@ -520,3 +518,35 @@ class KubeSpawner(Spawner):
             env['JPY_DEFAULT_URL'] = default_url
 
         return env
+
+class FormKubeSpawner(KubeSpawner):
+    def _options_form_default(self):
+        return """
+        <label for="cpu">CPU</label>
+        <select name="cpu">
+          <option value="1">1 CPU</option>
+          <option value="2">2 CPUs</option>
+        </select>
+        <label for="memory">Memory</label>
+        <select name="memory">
+          <option value="2G">2 Go</option>
+          <option value="4G">4 Go</option>
+          <option value="8G">8 Go</option>
+        </select>
+        <label for="otp">Select an OTP to charge on</label>
+        <select name="otp">
+          <option value="datalabotp">Datalab OTP</option>
+          <option disabled value="projectotp">Yet another OTP</option>
+        </select>
+        """
+
+    def options_from_form(self, formdata):
+        options = {}
+        
+        cpu = formdata.get('cpu', '0.5')[0]
+        memory = formdata.get('memory', '512Mi')[0]
+
+        self.cpu_limit = options['cpu'] = float(cpu)
+        self.mem_limit = options['memory'] = memory
+
+        return options
