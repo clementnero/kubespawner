@@ -78,6 +78,7 @@ def make_pod_spec(
                 {
                     'name': 'notebook',
                     'image': image_spec,
+                    'imagePullPolicy': 'Always',
                     'ports': [{
                         'containerPort': 8888,
                     }],
