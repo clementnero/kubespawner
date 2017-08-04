@@ -10,7 +10,8 @@ def make_pod_spec(
     cpu_limit,
     cpu_guarantee,
     mem_limit,
-    mem_guarantee
+    mem_guarantee,
+    scheduling_on_glusterfs_nodes
 ):
     """
     Make a k8s pod specification for running a user notebook.
@@ -54,24 +55,8 @@ def make_pod_spec(
             'name': name,
             # Temporary Hack to avoid scheduling on glusterfs nodes
             'annotations': {
-                "scheduler.alpha.kubernetes.io/affinity": {
-                    'nodeAffinity': {
-                        'requiredDuringSchedulingIgnoredDuringExecution': {
-                            'nodeSelectorTerms': [
-                                {
-                                    'matchExpressions': [
-                                        {
-                                            'key': 'storagenode',
-                                            'operator': 'NotIn',
-                                            'values': ['glusterfs']
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                }
-            }   
+                'scheduler.alpha.kubernetes.io/affinity': "{\"nodeAffinity\": {\"requiredDuringSchedulingIgnoredDuringExecution\": {\"nodeSelectorTerms\": [{\"matchExpressions\": [{\"key\": \"storagenode\",\"operator\": \"NotIn\",\"values\": [\"glusterfs\"]}]}]}}}"
+            } if not scheduling_on_glusterfs_nodes else {}
         },
         'spec': {
             'containers': [

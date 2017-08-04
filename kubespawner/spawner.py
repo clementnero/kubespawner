@@ -12,7 +12,7 @@ from datetime import datetime
 
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPError
-from traitlets import Unicode, List, Integer, Float
+from traitlets import Unicode, List, Integer, Float, Bool
 from jupyterhub.spawner import Spawner
 
 from kubespawner.utils import request_maker, k8s_url
@@ -284,6 +284,14 @@ class KubeSpawner(Spawner):
         """
     )
 
+    scheduling_on_glusterfs_nodes = Bool(
+        False,
+        config=True,
+        help="""
+        Hack to enable or disable pod scheduling on nodes with glusterfs label.
+        """
+    )
+
     def _expand_user_properties(self, template):
         # Make sure username matches the restrictions for DNS labels
         safe_chars = set(string.ascii_lowercase + string.digits)
@@ -330,6 +338,7 @@ class KubeSpawner(Spawner):
             self.cpu_guarantee,
             self.mem_limit,
             self.mem_guarantee,
+            self.scheduling_on_glusterfs_nodes
         )
 
     def get_pvc_manifest(self):
