@@ -52,6 +52,26 @@ def make_pod_spec(
         'kind': 'Pod',
         'metadata': {
             'name': name,
+            # Temporary Hack to avoid scheduling on glusterfs nodes
+            'annotations': {
+                "scheduler.alpha.kubernetes.io/affinity": {
+                    'nodeAffinity': {
+                        'requiredDuringSchedulingIgnoredDuringExecution': {
+                            'nodeSelectorTerms': [
+                                {
+                                    'matchExpressions': [
+                                        {
+                                            'key': 'storagenode',
+                                            'operator': 'NotIn',
+                                            'values': ['glusterfs']
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            }   
         },
         'spec': {
             'containers': [
