@@ -59,6 +59,25 @@ def make_pod_spec(
             } if not scheduling_on_glusterfs_nodes else {}
         },
         'spec': {
+            'affinity': {
+                'nodeAffinity': {
+                    'requiredDuringSchedulingIgnoredDuringExecution': {
+                        'nodeSelectorTerms': [
+                            {
+                                'matchExpressions': [
+                                    {
+                                        'key': 'storagenode',
+                                        'operator': 'NotIn',
+                                        'values': [
+                                            'glusterfs'
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            } if not scheduling_on_glusterfs_nodes else {},        
             'containers': [
                 {
                     'name': 'notebook',
